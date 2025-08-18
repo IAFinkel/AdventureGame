@@ -99,6 +99,9 @@ console.log("You start with " + playerGold + " gold.");
 while (gameRunning) {
   showLocation();
   let choiceNum = askForChoise();
+  if (choiceNum === null) {
+    break;
+  }
   playerMove(choiceNum);
   outIfDied(playerHealth);
 }
@@ -277,6 +280,15 @@ function showHelp() {
 function askForChoise() {
   while (true) {
     let choice = readline.question("\nEnter choice (number): ");
+    choice = choice.trim().toLowerCase();
+    if (choice === "quit" || choice === "q" || choice === "exit") {
+      quit();
+      return null;
+    }
+    if (choice === "help") {
+      showHelp();
+      continue;
+    }
     let validChoice = playerChoiseValidation(choice);
     if (validChoice !== null) {
       return validChoice;

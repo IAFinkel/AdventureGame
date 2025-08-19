@@ -44,6 +44,9 @@ const helthPotion = {
   value: 5,
   effect: 30,
   description: "helth potion restore players helth",
+  usePotion: function () {
+    updateHelth(this.effect);
+  },
 };
 
 const sword = {
@@ -52,6 +55,9 @@ const sword = {
   value: 10,
   effect: 10,
   description: "weapon increase the damage",
+  useSword: function () {
+    return this.effect;
+  },
 };
 
 const steelSword = {
@@ -60,6 +66,9 @@ const steelSword = {
   value: 15,
   effect: 15,
   description: "weapon increase the damage",
+  useSword: function () {
+    return this.effect;
+  },
 };
 
 const woodenShield = {
@@ -68,6 +77,9 @@ const woodenShield = {
   value: 8,
   effect: 5,
   description: "Reduces damage taken in combat",
+  useshield: function () {
+    return this.effect;
+  },
 };
 
 const ironShield = {
@@ -76,6 +88,9 @@ const ironShield = {
   value: 10,
   effect: 8,
   description: "Reduces damage taken in combat",
+  useshield: function () {
+    return this.effect;
+  },
 };
 
 // =========================================
@@ -119,7 +134,7 @@ function showStatus() {
   console.log("❤️  Health: " + playerHealth);
   console.log("💰 Gold: " + playerGold);
   console.log("📍 Location: " + currentLocation);
-  inventoryCheck();
+  showInventoryNames();
 }
 
 /**
@@ -226,13 +241,24 @@ function showLocation() {
  */
 function inventoryCheck() {
   if (inventory.length === 0) {
-    console.log("Inventory: Inventory is empty");
+    console.log("Inventory is empty");
   } else {
     console.log("Inventory:");
     inventory.forEach((item, i) => {
       console.log("\nItem " + (i + 1));
-      console.log(item);
+      console.log(
+        `${item.name} \neffect: ${item.effect} \ndescription: ${item.description}`
+      );
     });
+  }
+}
+
+function showInventoryNames() {
+  if (inventory.length === 0) {
+    console.log("Inventory is empty");
+  } else {
+    let itemNames = inventory.map((item) => item.name).join(", ");
+    console.log("Inventory: " + itemNames);
   }
 }
 
@@ -558,20 +584,26 @@ function updateHelth(helthPoints) {
  * @returns {boolean} true if item was used successfully, false if not
  */
 function useItem() {
-  inventoryCheck();
-  let choise = readline.question(
-    "What item you want to use? Insert the number"
-  );
-  let itemPosition = Number(choise) - 1;
-  if (inventory[itemPosition].type === "potion" && playerHealth < 100) {
-    console.log(
-      `You drink the ${inventory[itemPosition].name}, + ${inventory[itemPosition].effect} to helth`
+  if (inventory.length != 0) {
+    inventoryCheck();
+    let choise = readline.question(
+      "What item you want to use? Insert the number"
     );
-    updateHelth(inventory[itemPosition].effect);
-    inventory.splice(itemPosition, 1);
-    return true;
+    let itemPosition = Number(choise) - 1;
+    if (inventory[itemPosition].type === "potion" && playerHealth < 100) {
+      console.log(
+        `You drink the ${inventory[itemPosition].name}, + ${inventory[itemPosition].effect} to helth`
+      );
+      //updateHelth(inventory[itemPosition].effect);
+      inventory[itemPosition].usePotion();
+      inventory.splice(itemPosition, 1);
+      return true;
+    } else {
+      console.log("You can not use it now");
+      return false;
+    }
   } else {
-    console.log("You can not use it now");
+    console.log("No items to be used!");
     return false;
   }
 }
@@ -706,10 +738,7 @@ function combat(isDragon = false) {
   } else {
     monsterType("standart");
   }
-  if (
-    (hasGoodEquip() && isDragon) ||
-    (hasItemType("weapon") && isDragon === false)
-  ) {
+  if ((isDragon && hasGoodEquip()) || (!isDragon && hasItemType("weapon"))) {
     let weapon = getBestItem("weapon");
     let armor = getBestItem("armor");
     playerDefense = armor.effect;
@@ -748,7 +777,7 @@ function combat(isDragon = false) {
         }
       }
 
-      if (monsterHealth <= 0 && isDragon === false) {
+      if (monsterHealth <= 0 && !isDragon) {
         console.log("Monster defeated!");
         console.log("You found 10 gold!");
         playerGold += 10;
@@ -761,6 +790,9 @@ function combat(isDragon = false) {
         console.log("Game Over");
         inBattle = false;
         quit();
+      } else if (monsterHealth <= 0 && playerHealth <= 0) {
+        console.log("Both you and the monster fall in battle");
+        inBattle = false;
       } else if (playerHealth <= 0) {
         inBattle = false;
       }

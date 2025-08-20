@@ -26,15 +26,46 @@ let firstVisit = true;
 let battleWin = false;
 
 // ===========================================
-// GAME OBJECTS
+// GAME CLASSES AND OBJECTS
 // ===========================================
-const helthPotion = {
-  name: "Helth Potion",
-  type: "potion",
-  value: 5,
-  effect: 30,
-  description: "helth potion restore players helth",
-  use: function () {
+
+class Item {
+  constructor(name, type, value, effect, description) {
+    this.name = name;
+    this.type = type;
+    this.value = value;
+    this.effect = effect;
+    this.description = description;
+  }
+
+  use() {
+    console.log(`You took the ${this.name}, + ${this.effect} to attack`);
+    return this.effect;
+  }
+}
+
+class Weapon extends Item {
+  constructor(name, type, value, effect, description) {
+    super(name, type, value, effect, description);
+  }
+}
+
+class Armor extends Item {
+  constructor(name, type, value, effect, description) {
+    super(name, type, value, effect, description);
+  }
+  use() {
+    console.log(`You took the ${this.name}, + ${this.effect} to defense`);
+    return this.effect;
+  }
+}
+
+class Potion extends Item {
+  constructor(name, type, value, effect, description) {
+    super(name, type, value, effect, description);
+  }
+
+  use() {
     if (playerHealth < 100) {
       console.log(`You drink the ${this.name}, + ${this.effect} to helth`);
       updateHelth(this.effect);
@@ -44,56 +75,104 @@ const helthPotion = {
       console.log("You can not use it. The player helth is maximum");
       return false;
     }
-  },
-};
+  }
+}
 
-const sword = {
-  name: "Sword",
-  type: "weapon",
-  value: 10,
-  effect: 10,
-  description: "weapon increase the damage",
-  use: function () {
-    console.log(`You took the ${this.name}, + ${this.effect} to attack`);
-    return this.effect;
-  },
-};
+const sword = new Weapon(
+  "Sword",
+  "weapon",
+  10,
+  10,
+  "weapon increase the damage"
+);
+const steelSword = new Weapon(
+  "Steel Sword",
+  "weapon",
+  15,
+  15,
+  "weapon increase the damage"
+);
+const woodenShield = new Armor(
+  "Wooden Shield",
+  "amor",
+  5,
+  5,
+  "reduces damage taken in combat"
+);
+const healthPotion = new Potion(
+  "Health Potion",
+  "potion",
+  5,
+  30,
+  "helth potion restore players helth"
+);
 
-const steelSword = {
-  name: "Steel Sword",
-  type: "weapon",
-  value: 15,
-  effect: 15,
-  description: "weapon increase the damage",
-  use: function () {
-    console.log(`You took the ${this.name}, + ${this.effect} to attack`);
-    return this.effect;
-  },
-};
+// const helthPotion = {
+//   name: "Helth Potion",
+//   type: "potion",
+//   value: 5,
+//   effect: 30,
+//   description: "helth potion restore players helth",
+//   use: function () {
+//     if (playerHealth < 100) {
+//       console.log(`You drink the ${this.name}, + ${this.effect} to helth`);
+//       updateHelth(this.effect);
 
-const woodenShield = {
-  name: "Wooden Shield",
-  type: "armor",
-  value: 8,
-  effect: 5,
-  description: "Reduces damage taken in combat",
-  use: function () {
-    console.log(`You took the ${this.name}, + ${this.effect} to defence`);
-    return this.effect;
-  },
-};
+//       return true;
+//     } else {
+//       console.log("You can not use it. The player helth is maximum");
+//       return false;
+//     }
+//   },
+// };
 
-const ironShield = {
-  name: "Iron Shield",
-  type: "armor",
-  value: 10,
-  effect: 8,
-  description: "Reduces damage taken in combat",
-  use: function () {
-    console.log(`You took the ${this.name}, + ${this.effect} to defence`);
-    return this.effect;
-  },
-};
+// const sword = {
+//   name: "Sword",
+//   type: "weapon",
+//   value: 10,
+//   effect: 10,
+//   description: "weapon increase the damage",
+//   use: function () {
+//     console.log(`You took the ${this.name}, + ${this.effect} to attack`);
+//     return this.effect;
+//   },
+// };
+
+// const steelSword = {
+//   name: "Steel Sword",
+//   type: "weapon",
+//   value: 15,
+//   effect: 15,
+//   description: "weapon increase the damage",
+//   use: function () {
+//     console.log(`You took the ${this.name}, + ${this.effect} to attack`);
+//     return this.effect;
+//   },
+// };
+
+// const woodenShield = {
+//   name: "Wooden Shield",
+//   type: "armor",
+//   value: 8,
+//   effect: 5,
+//   description: "Reduces damage taken in combat",
+//   use: function () {
+//     console.log(`You took the ${this.name}, + ${this.effect} to defence`);
+//     return this.effect;
+//   },
+// };
+
+// const ironShield = {
+//   name: "Iron Shield",
+//   type: "armor",
+//   value: 10,
+//   effect: 8,
+//   description: "Reduces damage taken in combat",
+//   use: function () {
+//     console.log(`You took the ${this.name}, + ${this.effect} to defence`);
+//     return this.effect;
+//   },
+// };
 
 // =========================================
 // START GAME. INRODUCTION
@@ -186,7 +265,7 @@ function showLocation() {
     );
     console.log("\nWhat would you like to do?");
     console.log("1: Return to village");
-    console.log(`2: Buy potion for ${helthPotion.value} gold`);
+    console.log(`2: Buy potion for ${healthPotion.value} gold`);
     console.log("3: Check status");
     console.log("4: Check inventory");
     console.log("5: Use item");
@@ -787,7 +866,7 @@ function buyWeapon(weaponName) {
       `\nBlacksmith: 'A fine ${chosenItem.name} for a brave adventurer!'`
     );
     playerGold -= chosenItem.value;
-    inventory.push({ ...chosenItem });
+    inventory.push(chosenItem);
     console.log(
       `You bought a ${chosenItem.name} for ${chosenItem.value} gold!`
     );
@@ -798,12 +877,12 @@ function buyWeapon(weaponName) {
 }
 
 function buyPotion() {
-  if (playerGold >= helthPotion.value) {
+  if (playerGold >= healthPotion.value) {
     console.log("\nMerchant: 'This potion will heal your wounds!'");
-    playerGold -= helthPotion.value;
-    inventory.push({ ...helthPotion });
+    playerGold -= healthPotion.value;
+    inventory.push(healthPotion);
     console.log(
-      `You bought a ${helthPotion.name} for ${helthPotion.value} gold!`
+      `You bought a ${healthPotion.name} for ${healthPotion.value} gold!`
     );
     console.log("Gold remaining: " + playerGold);
   } else {
@@ -911,14 +990,22 @@ function combat(isDragon = false) {
 // =========================================
 
 function saveGame() {
+  console.log(inventory);
+  console.log(inventory.map((item) => item.constructor.name));
   const gameState = {
     helth: playerHealth,
     gold: playerGold,
-    inventory: inventory,
     playerName: playerName,
     location: currentLocation,
     firstVisit: firstVisit,
     battleWin: battleWin,
+    inventory: inventory.map((item) => ({
+      ...item,
+      classType: item.constructor.name,
+    })),
+    //...item - this creates a copy of the item object
+    // classType - additional field that we added to the item object
+    // item.constructor.name - method that will return the type of the class instance of witch the item is (ex: Potion)
   };
 
   try {
@@ -938,9 +1025,46 @@ function loadGame() {
     playerName = parsedData.playerName;
     playerHealth = parsedData.helth;
     currentLocation = parsedData.location;
-    inventory = parsedData.inventory;
     firstVisit = parsedData.firstVisit;
     battleWin = parsedData.battleWin;
+
+    inventory = parsedData.inventory.map((item) => {
+      switch (item.classType) {
+        case "Potion":
+          return new Potion(
+            item.name,
+            item.type,
+            item.value,
+            item.effect,
+            item.description
+          );
+        case "Weapon":
+          return new Weapon(
+            item.name,
+            item.type,
+            item.value,
+            item.effect,
+            item.description
+          );
+        case "Armor":
+          return new Armor(
+            item.name,
+            item.type,
+            item.value,
+            item.effect,
+            item.description
+          );
+
+        default:
+          return new Item(
+            item.name,
+            item.type,
+            item.value,
+            item.effect,
+            item.description
+          );
+      }
+    });
 
     console.log("Game loaded");
   } catch (error) {

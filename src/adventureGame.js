@@ -5,10 +5,17 @@
 
 // Include readline for player input
 const readline = require("readline-sync");
+const fs = require("fs");
 
 // ===========================================
 // GAME STATE VARIABLES
 // ===========================================
+
+let monsterDefense; // Monster's defense value
+let monsterHealth; // Monster's health value
+let monsterDamage; //Monster attack damage value
+let healingPotionValue = 30; // How much health is restored
+let weaponDamage = 0; // Will increase to 10 when player gets a sword
 let playerName = "";
 let playerHealth = 100;
 let playerGold = 200; // Starting gold
@@ -17,23 +24,6 @@ let gameRunning = true;
 let currentLocation = "village";
 let firstVisit = true;
 let battleWin = false;
-
-// Weapon damage (starts at 0 until player buys a sword)
-let weaponDamage = 0; // Will increase to 10 when player gets a sword
-console.log("Starting weapon damage: " + weaponDamage);
-console.log("When you buy a sword, weapon damage will increase to 10!");
-
-// Monster defense (affects combat outcomes)
-let monsterDefense; // Monster's defense value
-
-// Monster health (affects combat outcomes)
-let monsterHealth; // Monster's health value
-let monsterDamage; //Monster attack damage value
-
-// Healing potion restoration (matches final implementation)
-let healingPotionValue = 30; // How much health is restored
-console.log("Healing potion value: " + healingPotionValue);
-console.log("A potion will restore 30 health!");
 
 // ===========================================
 // GAME OBJECTS
@@ -112,16 +102,13 @@ const ironShield = {
 console.log("=================================");
 console.log("       The Dragon's Quest        ");
 console.log("=================================");
-console.log("\nYour quest: Defeat the dragon in the mountains!");
-
-// Get player's name
-playerName = readline.question("\nWhat is your name, brave adventurer? ");
-console.log("\nWelcome, " + playerName + "!");
-console.log("You start with " + playerGold + " gold.");
+console.log("\nYour quest: Defeat the dragon in the mountains!\n");
 
 // =========================================
 // MAIN LOOP
 // =========================================
+
+startDialog();
 
 while (gameRunning) {
   showLocation();
@@ -175,6 +162,8 @@ function showLocation() {
     console.log("6: Use item");
     console.log("7: Show help menu");
     console.log("8: Quit game");
+    console.log("9: Save game");
+    console.log("10: Load game");
   } else if (currentLocation === "blacksmith") {
     console.log(
       "The heat from the forge fills the air. Weapons and armor line the walls."
@@ -189,6 +178,8 @@ function showLocation() {
     console.log("7: Use item");
     console.log("8: Show help menu");
     console.log("9: Quit game");
+    console.log("10: Save game");
+    console.log("11: Load game");
   } else if (currentLocation === "market") {
     console.log(
       "Merchants sell their wares from colorful stalls. A potion seller catches your eye."
@@ -201,6 +192,8 @@ function showLocation() {
     console.log("5: Use item");
     console.log("6: Show help menu");
     console.log("7: Quit game");
+    console.log("8: Save game");
+    console.log("9: Load game");
   } else if (currentLocation === "forest" && battleWin) {
     monsterType("standart");
     console.log("A dark forest surrounds you. You hear strange noises...");
@@ -216,6 +209,8 @@ function showLocation() {
     console.log("6: Show help menu");
     console.log("7: Quit game");
     console.log("8: Go to Dragon nest");
+    console.log("9: Save game");
+    console.log("10: Load game");
   } else if (currentLocation === "forest" && battleWin === false) {
     monsterType("standart");
     console.log("A dark forest surrounds you. You hear strange noises...");
@@ -231,6 +226,8 @@ function showLocation() {
     console.log("5: Run");
     console.log("6: Show help menu");
     console.log("7: Quit game");
+    console.log("8: Save game");
+    console.log("9: Load game");
   } else if (currentLocation === "dragon nest") {
     monsterType("dragon");
     console.log("You in the dragon nest");
@@ -245,6 +242,8 @@ function showLocation() {
     console.log("5: Run");
     console.log("6: Show help menu");
     console.log("7: Quit game");
+    console.log("8: Save game");
+    console.log("9: Load game");
   }
 }
 
@@ -344,17 +343,17 @@ function playerChoiseValidation(choice) {
     if (isNaN(choiceNum)) {
       throw new Error("Error:This is not a number " + choice);
     }
-    if (currentLocation === "village" && (choiceNum < 1 || choiceNum > 8)) {
+    if (currentLocation === "village" && (choiceNum < 1 || choiceNum > 10)) {
       throw new Error(
         "Error:This is not a valid input for village " + choiceNum
       );
     }
-    if (currentLocation === "blacksmith" && (choiceNum < 1 || choiceNum > 9)) {
+    if (currentLocation === "blacksmith" && (choiceNum < 1 || choiceNum > 11)) {
       throw new Error(
         "Error:This is not a valid input for blacksmith " + choiceNum
       );
     }
-    if (currentLocation === "market" && (choiceNum < 1 || choiceNum > 7)) {
+    if (currentLocation === "market" && (choiceNum < 1 || choiceNum > 9)) {
       throw new Error(
         "Error:This is not a valid input for market " + choiceNum
       );
@@ -362,7 +361,7 @@ function playerChoiseValidation(choice) {
     if (
       currentLocation === "forest" &&
       battleWin &&
-      (choiceNum < 1 || choiceNum > 8)
+      (choiceNum < 1 || choiceNum > 10)
     ) {
       throw new Error(
         "Error:This is not a valid input for forest " + choiceNum
@@ -371,13 +370,13 @@ function playerChoiseValidation(choice) {
     if (
       currentLocation === "forest" &&
       battleWin === false &&
-      (choiceNum < 1 || choiceNum > 7)
+      (choiceNum < 1 || choiceNum > 9)
     ) {
       throw new Error(
         "Error:This is not a valid input for forest " + choiceNum
       );
     }
-    if (currentLocation === "dragon nest" && (choiceNum < 1 || choiceNum > 7)) {
+    if (currentLocation === "dragon nest" && (choiceNum < 1 || choiceNum > 9)) {
       throw new Error(
         "Error:This is not a valid input for dragon nest " + choiceNum
       );
@@ -427,8 +426,14 @@ function playerMove(num) {
     } else if (num === 8) {
       quit();
       return true;
+    } else if (num === 9) {
+      saveGame();
+      return true;
+    } else if (num === 10) {
+      loadGame();
+      return true;
     } else {
-      console.log("\nInvalid choice! Please enter a number between 1 and 8.");
+      console.log("\nInvalid choice! Please enter a number between 1 and 10.");
       return true;
     }
   } else if (currentLocation === "blacksmith") {
@@ -460,8 +465,14 @@ function playerMove(num) {
     } else if (num === 9) {
       quit();
       return true;
+    } else if (num === 10) {
+      saveGame();
+      return true;
+    } else if (num === 11) {
+      loadGame();
+      return true;
     } else {
-      console.log("\nInvalid choice! Please enter a number between 1 and 9.");
+      console.log("\nInvalid choice! Please enter a number between 1 and 11.");
       return true;
     }
   } else if (currentLocation === "market") {
@@ -487,8 +498,14 @@ function playerMove(num) {
     } else if (num === 7) {
       quit();
       return true;
+    } else if (num === 8) {
+      saveGame();
+      return true;
+    } else if (num === 9) {
+      loadGame();
+      return true;
     } else {
-      console.log("\nInvalid choice! Please enter a number between 1 and 7.");
+      console.log("\nInvalid choice! Please enter a number between 1 and 9.");
       return true;
     }
   } else if (currentLocation === "forest") {
@@ -514,11 +531,23 @@ function playerMove(num) {
     } else if (num === 7) {
       quit();
       return true;
-    } else if (num === 8) {
+    } else if (num === 8 && battleWin) {
       currentLocation = "dragon nest";
       console.log(
         "\nYou entered the Dragon Nest. Prepare for the final battle"
       );
+      return true;
+    } else if (num === 8 && !battleWin) {
+      saveGame();
+      return true;
+    } else if (num === 9 && battleWin) {
+      saveGame();
+      return true;
+    } else if (num === 9 && !battleWin) {
+      loadGame();
+      return true;
+    } else if (num === 10 && battleWin) {
+      loadGame();
       return true;
     }
   } else if (currentLocation === "dragon nest") {
@@ -543,6 +572,12 @@ function playerMove(num) {
       return true;
     } else if (num === 7) {
       quit();
+      return true;
+    } else if (num === 8) {
+      saveGame();
+      return true;
+    } else if (num === 9) {
+      loadGame();
       return true;
     }
   } else {
@@ -681,22 +716,52 @@ function hasGoodEquip() {
 If player does not want to use automatic weapon/armour choise when in battle, he can use it manually
 */
 function chooseWeaponForBattle(type) {
-  console.log(`What ${type} do you choose?`);
   let allWeapon = getItemsByType(type);
-  allWeapon.forEach((item, i) => {
-    console.log("\nItem " + (i + 1));
-    console.log(
-      `${item.name} \neffect: ${item.effect} \ndescription: ${item.description}`
-    );
-  });
-  while (true) {
-    let choise = readline.question("Enter the number:\n");
-    if (!allWeapon[choise - 1]) {
-      console.log("Invalid choise!");
-    } else {
-      let item = allWeapon[choise - 1];
-      return item;
+  if (allWeapon.length != 0) {
+    allWeapon.forEach((item, i) => {
+      console.log("\nItem " + (i + 1));
+      console.log(
+        `${item.name} \neffect: ${item.effect} \ndescription: ${item.description}`
+      );
+    });
+    while (true) {
+      try {
+        let choise = readline.question(
+          `What ${type} do you choose?\nEnter the number or type "quit" to continue without any\n`
+        );
+
+        if (choise.trim().toLowerCase() === "quit") {
+          return {
+            name: "",
+            type,
+            effect: 0,
+            use: function () {
+              return 0;
+            },
+          };
+        } else if (
+          choise.trim().toLowerCase() != "quit" &&
+          !allWeapon[choise - 1]
+        ) {
+          throw new Error("Invalid choise: " + choise);
+        } else {
+          let item = allWeapon[choise - 1];
+          return item;
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
     }
+  } else {
+    console.log(`You do not have any ${type}`);
+    return {
+      name: "",
+      type,
+      effect: 0,
+      use: function () {
+        return 0;
+      },
+    };
   }
 }
 
@@ -838,5 +903,71 @@ function combat(isDragon = false) {
     console.log("\nWithout proper equipment you must retreat");
     updateHelth(-20);
     currentLocation = "village"; // Return to village after battle
+  }
+}
+
+// =========================================
+// FUNCTIONS: SAVE AND LOAD THE GAME
+// =========================================
+
+function saveGame() {
+  const gameState = {
+    helth: playerHealth,
+    gold: playerGold,
+    inventory: inventory,
+    playerName: playerName,
+    location: currentLocation,
+    firstVisit: firstVisit,
+    battleWin: battleWin,
+  };
+
+  try {
+    fs.writeFileSync("savegame.json", JSON.stringify(gameState, null, 2));
+    console.log("Game saved");
+  } catch (error) {
+    console.log("Failed to save the game: " + error.message);
+  }
+}
+
+function loadGame() {
+  try {
+    const gameData = fs.readFileSync("savegame.json", "utf8");
+    const parsedData = JSON.parse(gameData);
+
+    playerGold = parsedData.gold;
+    playerName = parsedData.playerName;
+    playerHealth = parsedData.helth;
+    currentLocation = parsedData.location;
+    inventory = parsedData.inventory;
+    firstVisit = parsedData.firstVisit;
+    battleWin = parsedData.battleWin;
+
+    console.log("Game loaded");
+  } catch (error) {
+    console.log("Failed to load the game: " + error.message);
+  }
+}
+
+function startDialog() {
+  try {
+    let choise = readline.question("Dowload saved game: Y/N\n");
+    if (choise.trim().toLowerCase() === "y") {
+      loadGame();
+    } else if (choise.trim().toLowerCase() === "n") {
+      // Get player's name
+      playerName = readline.question("\nWhat is your name, brave adventurer? ");
+      console.log("\nWelcome, " + playerName + "!");
+      // Weapon damage (starts at 0 until player buys a sword)
+
+      console.log("Starting weapon damage: " + weaponDamage);
+      console.log("When you buy a weapon, weapon damage will increase!");
+      console.log("Healing potion value: " + healingPotionValue);
+      console.log("A potion will restore 30 health!");
+      console.log("You start with " + playerGold + " gold.");
+    } else {
+      throw new Error("Invalid choise: " + choise);
+    }
+  } catch (error) {
+    console.log(error.message);
   }
 }

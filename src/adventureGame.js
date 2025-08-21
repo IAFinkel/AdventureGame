@@ -19,6 +19,8 @@ let weaponDamage = 0; // Will increase to 10 when player gets a sword
 let playerName = "";
 let playerHealth = 100;
 let playerGold = 200; // Starting gold
+let playerDefense = 0;
+let playerAttack = 0;
 let inventory = []; //Array will store weapon, armor and heath potions
 let gameRunning = true;
 let currentLocation = "village";
@@ -39,7 +41,7 @@ class Item {
   }
 
   use() {
-    console.log(`You took the ${this.name}, + ${this.effect} to attack`);
+    console.log(`\nYou took the ${this.name}, + ${this.effect} to attack`);
     return this.effect;
   }
 }
@@ -67,12 +69,12 @@ class Potion extends Item {
 
   use() {
     if (playerHealth < 100) {
-      console.log(`You drink the ${this.name}, + ${this.effect} to helth`);
-      updateHelth(this.effect);
+      console.log(`You drink the ${this.name}, + ${this.effect} to health`);
+      updateHealth(this.effect);
 
       return true;
     } else {
-      console.log("You can not use it. The player helth is maximum");
+      console.log("You can not use it. The player health is maximum");
       return false;
     }
   }
@@ -94,7 +96,7 @@ const steelSword = new Weapon(
 );
 const woodenShield = new Armor(
   "Wooden Shield",
-  "amor",
+  "armor",
   5,
   5,
   "reduces damage taken in combat"
@@ -104,75 +106,77 @@ const healthPotion = new Potion(
   "potion",
   5,
   30,
-  "helth potion restore players helth"
+  "health potion restore players health"
 );
 
-// const helthPotion = {
-//   name: "Helth Potion",
-//   type: "potion",
-//   value: 5,
-//   effect: 30,
-//   description: "helth potion restore players helth",
-//   use: function () {
-//     if (playerHealth < 100) {
-//       console.log(`You drink the ${this.name}, + ${this.effect} to helth`);
-//       updateHelth(this.effect);
+class Enemy {
+  constructor(name, type, health, defense, damage, description) {
+    this.name = name;
+    this.type = type;
+    this.health = health;
+    this.defense = defense;
+    this.damage = damage;
+    this.description = description;
+  }
 
-//       return true;
-//     } else {
-//       console.log("You can not use it. The player helth is maximum");
-//       return false;
-//     }
-//   },
-// };
+  attack() {
+    if (this.health > 0) {
+      if (playerDefense > 0) {
+        let leftoverDamage = Math.abs(this.damage - playerDefense);
+        playerDefense = Math.max(0, playerDefense - Math.abs(this.damage));
+        if (leftoverDamage > 0) {
+          updateHealth(-leftoverDamage);
+        }
+        console.log("Player defense level is " + playerDefense);
 
-// const sword = {
-//   name: "Sword",
-//   type: "weapon",
-//   value: 10,
-//   effect: 10,
-//   description: "weapon increase the damage",
-//   use: function () {
-//     console.log(`You took the ${this.name}, + ${this.effect} to attack`);
-//     return this.effect;
-//   },
-// };
+        // console.log(`You drink the ${this.name}, + ${this.effect} to health`);
+        // updateHealth(this.effect);
+      } else {
+        updateHealth(-this.damage);
+      }
+    } else {
+      return false;
+    }
+  }
+}
 
-// const steelSword = {
-//   name: "Steel Sword",
-//   type: "weapon",
-//   value: 15,
-//   effect: 15,
-//   description: "weapon increase the damage",
-//   use: function () {
-//     console.log(`You took the ${this.name}, + ${this.effect} to attack`);
-//     return this.effect;
-//   },
-// };
+class Goblin extends Enemy {
+  constructor(name, type, health, defense, damage, description) {
+    super(name, type, health, defense, damage, description);
+  }
+}
 
-// const woodenShield = {
-//   name: "Wooden Shield",
-//   type: "armor",
-//   value: 8,
-//   effect: 5,
-//   description: "Reduces damage taken in combat",
-//   use: function () {
-//     console.log(`You took the ${this.name}, + ${this.effect} to defence`);
-//     return this.effect;
-//   },
-// };
+class Orc extends Enemy {
+  constructor(name, type, health, defense, damage, description) {
+    super(name, type, health, defense, damage, description);
+  }
+}
 
-// const ironShield = {
-//   name: "Iron Shield",
-//   type: "armor",
-//   value: 10,
-//   effect: 8,
-//   description: "Reduces damage taken in combat",
-//   use: function () {
-//     console.log(`You took the ${this.name}, + ${this.effect} to defence`);
-//     return this.effect;
-//   },
-// };
+class Dragon extends Enemy {
+  constructor(name, type, health, defense, damage, description) {
+    super(name, type, health, defense, damage, description);
+  }
+}
+
+const goblin = new Goblin(
+  "Forest goblin",
+  "easy",
+  20,
+  5,
+  5,
+  "forest goblins are angry but not to powerfull"
+);
+
+const orc = new Orc("Orc", "hard", 30, 15, 10, "orcs are strong and furious");
+
+const dragon = new Dragon(
+  "Dragon",
+  "boss",
+  50,
+  30,
+  20,
+  "dragons are very powerfull and have strong defense"
+);
 
 // =========================================
 // START GAME. INRODUCTION
@@ -274,11 +278,11 @@ function showLocation() {
     console.log("8: Save game");
     console.log("9: Load game");
   } else if (currentLocation === "forest" && battleWin) {
-    monsterType("standart");
     console.log("A dark forest surrounds you. You hear strange noises...");
-    console.log("You faced the monster");
-    console.log("\nMonster helth level - " + monsterHealth);
-    console.log("\nMonster defence level - " + monsterDefense);
+    console.log("You faced the monster " + orc.name);
+    console.log(
+      `\nMonster stat: \nHealth - ${orc.health}\nDefense - ${orc.defense}\nDamage - ${orc.damage}`
+    );
     console.log("\nWhat would you like to do?");
     console.log("1: Check status");
     console.log("2: Check inventory");
@@ -291,12 +295,11 @@ function showLocation() {
     console.log("9: Save game");
     console.log("10: Load game");
   } else if (currentLocation === "forest" && battleWin === false) {
-    monsterType("standart");
     console.log("A dark forest surrounds you. You hear strange noises...");
-    console.log("You faced the monster");
-    console.log("\nMonster helth level - " + monsterHealth);
-    console.log("\nMonster defence level - " + monsterDefense);
-    console.log("\nMonster damage level - " + monsterDamage);
+    console.log("You faced the monster " + goblin.name);
+    console.log(
+      `\nMonster stat: \nHealth - ${goblin.health}\nDefense - ${goblin.defense}\nDamage - ${goblin.damage}`
+    );
     console.log("\nWhat would you like to do?");
     console.log("1: Check status");
     console.log("2: Check inventory");
@@ -308,11 +311,11 @@ function showLocation() {
     console.log("8: Save game");
     console.log("9: Load game");
   } else if (currentLocation === "dragon nest") {
-    monsterType("dragon");
     console.log("You in the dragon nest");
-    console.log("\nMonster helth level - " + monsterHealth);
-    console.log("\nMonster defence level - " + monsterDefense);
-    console.log("\nMonster damage level - " + monsterDamage);
+    console.log("You faced the monster " + dragon.name);
+    console.log(
+      `\nMonster stat: \nHealth - ${dragon.health}\nDefense - ${dragon.defense}\nDamage - ${dragon.damage}`
+    );
     console.log("\nWhat would you like to do?");
     console.log("1: Check status");
     console.log("2: Check inventory");
@@ -460,7 +463,7 @@ function playerChoiseValidation(choice) {
         "Error:This is not a valid input for dragon nest " + choiceNum
       );
     } else {
-      console.log("Youre choise is " + choiceNum);
+      //  console.log("Youre choise is " + choiceNum);
       return choiceNum;
     }
   } catch (error) {
@@ -521,13 +524,13 @@ function playerMove(num) {
       console.log("\nYou return to the village center.");
       return true;
     } else if (num === 2) {
-      buyWeapon("Sword");
+      buyItems(sword);
       return true;
     } else if (num === 3) {
-      buyWeapon("Steel Sword");
+      buyItems(steelSword);
       return true;
     } else if (num === 4) {
-      buyWeapon("Wooden Shield");
+      buyItems(woodenShield);
       return true;
     } else if (num === 5) {
       showStatus();
@@ -560,7 +563,7 @@ function playerMove(num) {
       console.log("\nYou return to the village center.");
       return true;
     } else if (num === 2) {
-      buyPotion();
+      buyItems(healthPotion);
       return true;
     } else if (num === 3) {
       showStatus();
@@ -597,8 +600,11 @@ function playerMove(num) {
     } else if (num === 3) {
       useItem();
       return true;
-    } else if (num === 4) {
-      combat();
+    } else if (num === 4 && !battleWin) {
+      combat(goblin);
+      return true;
+    } else if (num === 4 && battleWin) {
+      combat(orc);
       return true;
     } else if (num === 5) {
       currentLocation = "village";
@@ -640,7 +646,7 @@ function playerMove(num) {
       useItem();
       return true;
     } else if (num === 4) {
-      combat(true);
+      combat(dragon);
       return true;
     } else if (num === 5) {
       currentLocation = "forest";
@@ -679,29 +685,24 @@ function quit() {
 // =========================================
 
 /** 
-Update player helth if damaged of healed
-* @param {number} helthPoints helth or damage value
+Update player health if damaged of healed
+* @param {number} healthPoints health or damage value
 */
-function updateHelth(helthPoints) {
-  if (helthPoints < 0 && playerHealth > 0) {
-    playerHealth = playerHealth + helthPoints;
-    console.log("The player helth decreased by " + helthPoints + " points");
-    console.log("Player helth is " + playerHealth);
-  } else if (helthPoints > 0 && playerHealth < 100) {
-    let remainingHelth = 100 - playerHealth;
-    if (remainingHelth > helthPoints) {
-      playerHealth = playerHealth + helthPoints;
-      console.log("The player helth increased by " + helthPoints + " points");
-      console.log("Player helth is " + playerHealth);
+function updateHealth(healthPoints) {
+  if (healthPoints < 0 && playerHealth > 0) {
+    playerHealth = playerHealth + healthPoints;
+    console.log("Player health is " + playerHealth);
+  } else if (healthPoints > 0 && playerHealth < 100) {
+    let remainingHealth = 100 - playerHealth;
+    if (remainingHealth > healthPoints) {
+      playerHealth = playerHealth + healthPoints;
+      console.log("Player health is " + playerHealth);
     } else {
       playerHealth = 100;
-      console.log(
-        "The player helth increased by " + remainingHelth + " points"
-      );
-      console.log("Player helth is " + playerHealth);
+      console.log("Player health is " + playerHealth);
     }
-  } else if (helthPoints > 0 && playerHealth >= 100) {
-    console.log("The player helth is maximum");
+  } else if (healthPoints > 0 && playerHealth >= 100) {
+    console.log("The player health is maximum");
   }
 }
 
@@ -792,7 +793,7 @@ function hasGoodEquip() {
 }
 
 /*
-If player does not want to use automatic weapon/armour choise when in battle, he can use it manually
+If player does not want to use automatic weapon/armor choise when in battle, he can use it manually
 */
 function chooseWeaponForBattle(type) {
   let allWeapon = getItemsByType(type);
@@ -806,7 +807,7 @@ function chooseWeaponForBattle(type) {
     while (true) {
       try {
         let choise = readline.question(
-          `What ${type} do you choose?\nEnter the number or type "quit" to continue without any\n`
+          `\nWhat ${type} do you choose?\nEnter the number or type "quit" to continue without any: `
         );
 
         if (choise.trim().toLowerCase() === "quit") {
@@ -832,7 +833,7 @@ function chooseWeaponForBattle(type) {
       }
     }
   } else {
-    console.log(`You do not have any ${type}`);
+    console.log(`\nYou do not have any ${type}`);
     return {
       name: "",
       type,
@@ -849,44 +850,24 @@ function chooseWeaponForBattle(type) {
 // Functions that handle buying items
 // ===========================
 
-function buyWeapon(weaponName) {
-  let chosenItem;
-  if (weaponName === "Sword") {
-    chosenItem = sword;
-  }
-  if (weaponName === "Steel Sword") {
-    chosenItem = steelSword;
-  }
-  if (weaponName === "Wooden Shield") {
-    chosenItem = woodenShield;
-  }
+function buyItems(item) {
+  const ItemClass = item.constructor;
 
-  if (playerGold >= chosenItem.value) {
-    console.log(
-      `\nBlacksmith: 'A fine ${chosenItem.name} for a brave adventurer!'`
+  if (playerGold >= item.value) {
+    playerGold -= item.value;
+    inventory.push(
+      new ItemClass(
+        item.name,
+        item.type,
+        item.value,
+        item.effect,
+        item.description
+      )
     );
-    playerGold -= chosenItem.value;
-    inventory.push(chosenItem);
-    console.log(
-      `You bought a ${chosenItem.name} for ${chosenItem.value} gold!`
-    );
+    console.log(`You bought a ${item.name} for ${item.value} gold!`);
     console.log("Gold remaining: " + playerGold);
   } else {
-    console.log("\nBlacksmith: 'Come back when you have more gold!'");
-  }
-}
-
-function buyPotion() {
-  if (playerGold >= healthPotion.value) {
-    console.log("\nMerchant: 'This potion will heal your wounds!'");
-    playerGold -= healthPotion.value;
-    inventory.push(healthPotion);
-    console.log(
-      `You bought a ${healthPotion.name} for ${healthPotion.value} gold!`
-    );
-    console.log("Gold remaining: " + playerGold);
-  } else {
-    console.log("\nMerchant: 'Come back when you have more gold!'");
+    console.log("\n'Come back when you have more gold!'");
   }
 }
 
@@ -894,75 +875,56 @@ function buyPotion() {
 // FUNCTIONS: BATTLE
 // =========================================
 
-function monsterType(type) {
-  if (type === "dragon") {
-    monsterHealth = 50;
-    monsterDefense = 30;
-    monsterDamage = 20;
-  } else if (type === "standart") {
-    monsterHealth = 10;
-    monsterDefense = 5;
-    monsterDamage = 1;
-  }
-}
-
 /**
- * Battle: if the isDragon flag = true -> final battle with dragon
- * if false -> regular forest battle.
+ * Battle: receives enemy object
  * Checks if player has weapon and armor: if no -> back to the village, if yes - fight.
- * Player loses helth on every attack.
+ * for boss battle checks if player has proper wepon and armor
+ * Player loses health on every attack.
  */
-function combat(isDragon = false) {
+function combat(enemy) {
   let inBattle = true;
-  let playerDefense;
-  let playerAttack;
-  if (isDragon) {
-    monsterType("dragon");
-  } else {
-    monsterType("standart");
-  }
-  if ((isDragon && hasGoodEquip()) || (!isDragon && hasItemType("weapon"))) {
-    // let weapon = getBestItem("weapon");
-    // let armor = getBestItem("armor");
+  //to be able to use not the original enemy oblect, but its clone
+  //need to create new Object - Object.create where prototype is enemy - Object.getPrototypeOf(enemy)
+  //and then assign to the empty new object the values of enemy
+  let enemyClone = Object.assign(
+    Object.create(Object.getPrototypeOf(enemy)),
+    enemy
+  );
+  if (
+    (enemyClone.type === "boss" && hasGoodEquip()) ||
+    (enemyClone.type !== "boss" && hasItemType("weapon"))
+  ) {
     let weapon = chooseWeaponForBattle("weapon");
     let armor = chooseWeaponForBattle("armor");
     playerDefense = armor.use();
     playerAttack = weapon.use();
-    //playerDefense = armor.effect;
-    console.log(`\nYou started the battle!`);
-    while (inBattle) {
-      console.log("Monster health: " + monsterHealth);
-      console.log("Monster defense: " + monsterDefense);
-      console.log("You attack!");
 
-      if (monsterDefense > 0) {
-        let leftoverDamage = Math.max(0, playerAttack - monsterDefense);
+    console.log(`\nYou started the battle!\n`);
+    while (inBattle) {
+      console.log("\nYou attack!");
+
+      if (enemyClone.defense > 0) {
+        let leftoverDamage = Math.max(0, playerAttack - enemyClone.defense);
         if (leftoverDamage > 0) {
-          monsterDefense = 0;
-          monsterHealth -= leftoverDamage;
+          enemyClone.defense = 0;
+          enemyClone.health -= leftoverDamage;
         } else {
-          monsterDefense -= playerAttack;
+          enemyClone.defense -= playerAttack;
         }
       } else {
-        monsterHealth -= playerAttack;
-      }
-      if (monsterHealth > 0) {
-        if (playerDefense > 0) {
-          let leftoverDamage = Math.abs(monsterDamage) - playerDefense;
-          playerDefense = Math.max(0, playerDefense - Math.abs(monsterDamage));
-          if (leftoverDamage > 0) {
-            updateHelth(-leftoverDamage);
-          }
-          console.log("Player defense level is " + playerDefense);
-        } else {
-          updateHelth(-monsterDamage);
-        }
+        enemyClone.health -= playerAttack;
       }
 
-      if (monsterHealth <= 0 && playerHealth <= 0) {
+      console.log(
+        `\nMonster stat: \nHealth - ${enemyClone.health}\nDefense - ${enemyClone.defense}\nDamage - ${enemyClone.damage}`
+      );
+      console.log(`${enemyClone.name} strikes back!`);
+      enemyClone.attack();
+
+      if (enemyClone.health <= 0 && playerHealth <= 0) {
         console.log("Both you and the monster fall in battle");
         inBattle = false;
-      } else if (monsterHealth <= 0 && !isDragon) {
+      } else if (enemyClone.health <= 0 && enemyClone.type === "easy") {
         console.log("Monster defeated!");
         console.log("You found 10 gold!");
         playerGold += 10;
@@ -970,7 +932,15 @@ function combat(isDragon = false) {
         battleWin = true;
         currentLocation = "village"; // Return to village after battle
         console.log("\nYou return to the safety of the village.");
-      } else if (monsterHealth <= 0 && isDragon) {
+      } else if (enemyClone.health <= 0 && enemyClone.type === "hard") {
+        console.log("Monster defeated!");
+        console.log("You found 30 gold!");
+        playerGold += 30;
+        inBattle = false;
+        battleWin = true;
+        currentLocation = "village"; // Return to village after battle
+        console.log("\nYou return to the safety of the village.");
+      } else if (enemyClone.health <= 0 && enemyClone.type === "boss") {
         console.log("You killed the Dragon!");
         console.log("Game Over");
         quit();
@@ -980,7 +950,7 @@ function combat(isDragon = false) {
     }
   } else {
     console.log("\nWithout proper equipment you must retreat");
-    updateHelth(-20);
+    updateHealth(-20);
     currentLocation = "village"; // Return to village after battle
   }
 }
@@ -990,10 +960,8 @@ function combat(isDragon = false) {
 // =========================================
 
 function saveGame() {
-  console.log(inventory);
-  console.log(inventory.map((item) => item.constructor.name));
   const gameState = {
-    helth: playerHealth,
+    health: playerHealth,
     gold: playerGold,
     playerName: playerName,
     location: currentLocation,
@@ -1023,7 +991,7 @@ function loadGame() {
 
     playerGold = parsedData.gold;
     playerName = parsedData.playerName;
-    playerHealth = parsedData.helth;
+    playerHealth = parsedData.health;
     currentLocation = parsedData.location;
     firstVisit = parsedData.firstVisit;
     battleWin = parsedData.battleWin;

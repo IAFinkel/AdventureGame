@@ -1,5 +1,5 @@
 const { updateHealth } = require("./utils");
-const { playerHealth, playerDefense } = require("./gameState");
+const gameState = require("./gameState");
 
 class Item {
   constructor(name, type, value, effect, description) {
@@ -38,7 +38,7 @@ class Potion extends Item {
   }
 
   use() {
-    if (playerHealth < 100) {
+    if (gameState.getplayerHealth() < 100) {
       console.log(`You drink the ${this.name}, + ${this.effect} to health`);
       updateHealth(this.effect);
 
@@ -62,13 +62,17 @@ class Enemy {
 
   attack() {
     if (this.health > 0) {
-      if (playerDefense > 0) {
-        let leftoverDamage = Math.abs(this.damage - playerDefense);
-        playerDefense = Math.max(0, playerDefense - Math.abs(this.damage));
+      if (gameState.getplayerDefense() > 0) {
+        let leftoverDamage = Math.abs(
+          this.damage - gameState.getplayerDefense()
+        );
+        gameState.setplayerDefense(
+          Math.max(0, gameState.getplayerDefense() - Math.abs(this.damage))
+        );
         if (leftoverDamage > 0) {
           updateHealth(-leftoverDamage);
         }
-        console.log("Player defense level is " + playerDefense);
+        console.log("Player defense level is " + gameState.getplayerDefense());
 
         // console.log(`You drink the ${this.name}, + ${this.effect} to health`);
         // updateHealth(this.effect);

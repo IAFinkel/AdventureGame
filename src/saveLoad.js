@@ -1,31 +1,18 @@
-const { inventory } = require("./inventory");
+const { getInventory, setInvetory } = require("./inventory");
 const { Weapon, Armor, Potion, Item } = require("./classes");
-const {
-  healingPotionValue,
-  weaponDamage,
-  playerName,
-  playerHealth,
-  playerGold,
-  currentLocation,
-  firstVisit,
-  battleWin,
-} = require("./gameState");
-
+const gameState = require("./gameState");
 const fs = require("fs");
 const readline = require("readline-sync");
-// =========================================
-// FUNCTIONS: SAVE AND LOAD THE GAME
-// =========================================
 
 function saveGame() {
-  const gameState = {
-    health: playerHealth,
-    gold: playerGold,
-    playerName: playerName,
-    location: currentLocation,
-    firstVisit: firstVisit,
-    battleWin: battleWin,
-    inventory: inventory.map((item) => ({
+  const status = {
+    health: gameState.getplayerHealth(),
+    gold: gameState.getplayerGold(),
+    playerName: gameState.getplayerName(),
+    location: gameState.getcurrentLocation(),
+    firstVisit: gameState.getfirstVisit(),
+    battleWin: gameState.getbattleWin(),
+    inventory: getInventory().map((item) => ({
       ...item,
       classType: item.constructor.name,
     })),
@@ -35,7 +22,7 @@ function saveGame() {
   };
 
   try {
-    fs.writeFileSync("savegame.json", JSON.stringify(gameState, null, 2));
+    fs.writeFileSync("savegame.json", JSON.stringify(status, null, 2));
     console.log("Game saved");
   } catch (error) {
     console.log("Failed to save the game: " + error.message);
@@ -47,50 +34,52 @@ function loadGame() {
     const gameData = fs.readFileSync("savegame.json", "utf8");
     const parsedData = JSON.parse(gameData);
 
-    playerGold = parsedData.gold;
-    playerName = parsedData.playerName;
-    playerHealth = parsedData.health;
-    currentLocation = parsedData.location;
-    firstVisit = parsedData.firstVisit;
-    battleWin = parsedData.battleWin;
+    gameState.setplayerGold(parsedData.gold);
+    gameState.setplayerName(parsedData.playerName);
+    gameState.setplayerHealth(parsedData.health);
+    gameState.setcurrentLocation(parsedData.location);
+    gameState.setfirstVisit(parsedData.firstVisit);
+    gameState.setbattleWin(parsedData.battleWin);
 
-    inventory = parsedData.inventory.map((item) => {
-      switch (item.classType) {
-        case "Potion":
-          return new Potion(
-            item.name,
-            item.type,
-            item.value,
-            item.effect,
-            item.description
-          );
-        case "Weapon":
-          return new Weapon(
-            item.name,
-            item.type,
-            item.value,
-            item.effect,
-            item.description
-          );
-        case "Armor":
-          return new Armor(
-            item.name,
-            item.type,
-            item.value,
-            item.effect,
-            item.description
-          );
+    setInvetory(
+      parsedData.inventory.map((item) => {
+        switch (item.classType) {
+          case "Potion":
+            return new Potion(
+              item.name,
+              item.type,
+              item.value,
+              item.effect,
+              item.description
+            );
+          case "Weapon":
+            return new Weapon(
+              item.name,
+              item.type,
+              item.value,
+              item.effect,
+              item.description
+            );
+          case "Armor":
+            return new Armor(
+              item.name,
+              item.type,
+              item.value,
+              item.effect,
+              item.description
+            );
 
-        default:
-          return new Item(
-            item.name,
-            item.type,
-            item.value,
-            item.effect,
-            item.description
-          );
-      }
-    });
+          default:
+            return new Item(
+              item.name,
+              item.type,
+              item.value,
+              item.effect,
+              item.description
+            );
+        }
+      })
+    );
 
     console.log("Game loaded");
   } catch (error) {
@@ -105,15 +94,17 @@ function startDialog() {
       loadGame();
     } else if (choise.trim().toLowerCase() === "n") {
       // Get player's name
-      playerName = readline.question("\nWhat is your name, brave adventurer? ");
-      console.log("\nWelcome, " + playerName + "!");
+      gameState.setplayerName(
+        readline.question("\nWhat is your name, brave adventurer? ")
+      );
+      console.log("\nWelcome, " + gameState.getplayerName() + "!");
       // Weapon damage (starts at 0 until player buys a sword)
 
-      console.log("Starting weapon damage: " + weaponDamage);
+      console.log("Starting weapon damage: " + gameState.getweaponDamage());
       console.log("When you buy a weapon, weapon damage will increase!");
-      console.log("Healing potion value: " + healingPotionValue);
+      console.log("Healing potion value: " + gameState.getHealingPotionValue());
       console.log("A potion will restore 30 health!");
-      console.log("You start with " + playerGold + " gold.");
+      console.log("You start with " + gameState.getplayerGold() + " gold.");
     } else {
       throw new Error("Invalid choise: " + choise);
     }

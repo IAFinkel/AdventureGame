@@ -4,12 +4,7 @@ const {
   chooseWeaponForBattle,
 } = require("./inventory");
 const { updateHealth, quit } = require("./utils");
-const {
-  playerHealth,
-  playerGold,
-  playerDefense,
-  playerAttack,
-} = require("./gameState");
+const gameState = require("./gameState");
 
 /**
  * Battle: receives enemy object
@@ -32,23 +27,26 @@ function combat(enemy) {
   ) {
     let weapon = chooseWeaponForBattle("weapon");
     let armor = chooseWeaponForBattle("armor");
-    playerDefense = armor.use();
-    playerAttack = weapon.use();
+    gameState.setplayerDefense(armor.use());
+    gameState.setplayerAttack(weapon.use());
 
     console.log(`\nYou started the battle!\n`);
     while (inBattle) {
       console.log("\nYou attack!");
 
       if (enemyClone.defense > 0) {
-        let leftoverDamage = Math.max(0, playerAttack - enemyClone.defense);
+        let leftoverDamage = Math.max(
+          0,
+          gameState.getplayerAttack() - enemyClone.defense
+        );
         if (leftoverDamage > 0) {
           enemyClone.defense = 0;
           enemyClone.health -= leftoverDamage;
         } else {
-          enemyClone.defense -= playerAttack;
+          enemyClone.defense -= gameState.getplayerAttack();
         }
       } else {
-        enemyClone.health -= playerAttack;
+        enemyClone.health -= gameState.getplayerAttack();
       }
 
       console.log(
@@ -57,37 +55,37 @@ function combat(enemy) {
       console.log(`${enemyClone.name} strikes back!`);
       enemyClone.attack();
 
-      if (enemyClone.health <= 0 && playerHealth <= 0) {
+      if (enemyClone.health <= 0 && gameState.getplayerHealth() <= 0) {
         console.log("Both you and the monster fall in battle");
         inBattle = false;
       } else if (enemyClone.health <= 0 && enemyClone.type === "easy") {
         console.log("Monster defeated!");
         console.log("You found 10 gold!");
-        playerGold += 10;
+        gameState.setplayerGold(gameState.getplayerGold() + 10);
         inBattle = false;
-        battleWin = true;
-        currentLocation = "village"; // Return to village after battle
+        gameState.setbattleWin(true);
+        gameState.setcurrentLocation("village"); // Return to village after battle
         console.log("\nYou return to the safety of the village.");
       } else if (enemyClone.health <= 0 && enemyClone.type === "hard") {
         console.log("Monster defeated!");
         console.log("You found 30 gold!");
-        playerGold += 30;
+        gameState.setplayerGold(gameState.getplayerGold() + 30);
         inBattle = false;
-        battleWin = true;
-        currentLocation = "village"; // Return to village after battle
+        gameState.setbattleWin(true);
+        gameState.setcurrentLocation("village"); // Return to village after battle
         console.log("\nYou return to the safety of the village.");
       } else if (enemyClone.health <= 0 && enemyClone.type === "boss") {
         console.log("You killed the Dragon!");
         console.log("Game Over");
         quit();
-      } else if (playerHealth <= 0) {
+      } else if (gameState.getplayerHealth() <= 0) {
         inBattle = false;
       }
     }
   } else {
     console.log("\nWithout proper equipment you must retreat");
     updateHealth(-20);
-    currentLocation = "village"; // Return to village after battle
+    gameState.setcurrentLocation("village"); // Return to village after battle
   }
 }
 

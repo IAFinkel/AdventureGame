@@ -72,14 +72,14 @@ console.log("\nYour quest: Defeat the dragon in the mountains!\n");
 
 startDialog();
 
-while (gameState.) {
+while (gameState.getgameRunning()) {
   showLocation();
   let choiceNum = askForChoise();
   if (choiceNum === null) {
     break;
   }
   playerMove(choiceNum);
-  outIfDied(playerHealth);
+  outIfDied();
 }
 
 // =========================================
@@ -102,16 +102,16 @@ while (gameState.) {
  * Shows the current location's description and available choices
  */
 function showLocation() {
-  if (gameState.firstVisit) {
+  if (gameState.getfirstVisit()) {
     console.log(
       "\nVillager: 'Welcome, adventurer! Rumor has it there's a dragon in the mountains...'"
     );
-    gameState.firstVisit = false;
+    gameState.setfirstVisit(false);
   }
 
-  console.log("\n=== " + gameState.currentLocation.toUpperCase() + " ===");
+  console.log("\n=== " + gameState.getcurrentLocation().toUpperCase() + " ===");
 
-  if (gameState.currentLocation === "village") {
+  if (gameState.getcurrentLocation() === "village") {
     console.log(
       "You're in a bustling village. The blacksmith and market are nearby."
     );
@@ -126,7 +126,7 @@ function showLocation() {
     console.log("8: Quit game");
     console.log("9: Save game");
     console.log("10: Load game");
-  } else if (gameState.currentLocation === "blacksmith") {
+  } else if (gameState.getcurrentLocation() === "blacksmith") {
     console.log(
       "The heat from the forge fills the air. Weapons and armor line the walls."
     );
@@ -142,7 +142,7 @@ function showLocation() {
     console.log("9: Quit game");
     console.log("10: Save game");
     console.log("11: Load game");
-  } else if (gameState.currentLocation === "market") {
+  } else if (gameState.getcurrentLocation() === "market") {
     console.log(
       "Merchants sell their wares from colorful stalls. A potion seller catches your eye."
     );
@@ -156,7 +156,10 @@ function showLocation() {
     console.log("7: Quit game");
     console.log("8: Save game");
     console.log("9: Load game");
-  } else if (gameState.currentLocation === "forest" && gameState.battleWin) {
+  } else if (
+    gameState.getcurrentLocation() === "forest" &&
+    gameState.getbattleWin()
+  ) {
     console.log("A dark forest surrounds you. You hear strange noises...");
     console.log("You faced the monster " + orc.name);
     console.log(
@@ -173,7 +176,10 @@ function showLocation() {
     console.log("8: Go to Dragon nest");
     console.log("9: Save game");
     console.log("10: Load game");
-  } else if (gameState.currentLocation === "forest" && gameState.battleWin === false) {
+  } else if (
+    gameState.getcurrentLocation() === "forest" &&
+    gameState.getbattleWin() === false
+  ) {
     console.log("A dark forest surrounds you. You hear strange noises...");
     console.log("You faced the monster " + goblin.name);
     console.log(
@@ -189,7 +195,7 @@ function showLocation() {
     console.log("7: Quit game");
     console.log("8: Save game");
     console.log("9: Load game");
-  } else if (gameState.currentLocation === "dragon nest") {
+  } else if (gameState.getcurrentLocation() === "dragon nest") {
     console.log("You in the dragon nest");
     console.log("You faced the monster " + dragon.name);
     console.log(
@@ -357,17 +363,17 @@ function showLocation() {
  * @returns {boolean} True if movement was successful
  */
 function playerMove(num) {
-  if (gameState.currentLocation === "village") {
+  if (gameState.getcurrentLocation() === "village") {
     if (num === 1) {
-      gameState.currentLocation = "blacksmith";
+      gameState.setcurrentLocation("blacksmith");
       console.log("\nYou enter the blacksmith's shop.");
       return true;
     } else if (num === 2) {
-      gameState.currentLocation = "market";
+      gameState.setcurrentLocation("market");
       console.log("\nYou enter the market.");
       return true;
     } else if (num === 3) {
-      gameState.currentLocation = "forest";
+      gameState.setcurrentLocation("forest");
       console.log("\nYou venture into the forest...");
       return true;
     } else if (num === 4) {
@@ -397,9 +403,9 @@ function playerMove(num) {
       console.log("\nInvalid choice! Please enter a number between 1 and 10.");
       return true;
     }
-  } else if (gameState.currentLocation === "blacksmith") {
+  } else if (gameState.getcurrentLocation() === "blacksmith") {
     if (num === 1) {
-      gameState.currentLocation = "village";
+      gameState.setcurrentLocation("village");
       console.log("\nYou return to the village center.");
       return true;
     } else if (num === 2) {
@@ -436,9 +442,9 @@ function playerMove(num) {
       console.log("\nInvalid choice! Please enter a number between 1 and 11.");
       return true;
     }
-  } else if (currentLocation === "market") {
+  } else if (gameState.getcurrentLocation() === "market") {
     if (num === 1) {
-      currentLocation = "village";
+      gameState.setcurrentLocation("village");
       console.log("\nYou return to the village center.");
       return true;
     } else if (num === 2) {
@@ -469,7 +475,7 @@ function playerMove(num) {
       console.log("\nInvalid choice! Please enter a number between 1 and 9.");
       return true;
     }
-  } else if (currentLocation === "forest") {
+  } else if (gameState.getcurrentLocation() === "forest") {
     if (num === 1) {
       showStatus();
       return true;
@@ -479,14 +485,14 @@ function playerMove(num) {
     } else if (num === 3) {
       useItem();
       return true;
-    } else if (num === 4 && !battleWin) {
+    } else if (num === 4 && !gameState.getbattleWin()) {
       combat(goblin);
       return true;
-    } else if (num === 4 && battleWin) {
+    } else if (num === 4 && gameState.getbattleWin()) {
       combat(orc);
       return true;
     } else if (num === 5) {
-      currentLocation = "village";
+      gameState.setcurrentLocation("village");
       console.log("\nYou return to the village center.");
       return true;
     } else if (num === 6) {
@@ -495,26 +501,26 @@ function playerMove(num) {
     } else if (num === 7) {
       quit();
       return true;
-    } else if (num === 8 && battleWin) {
-      currentLocation = "dragon nest";
+    } else if (num === 8 && gameState.getbattleWin()) {
+      gameState.setcurrentLocation("dragon nest");
       console.log(
         "\nYou entered the Dragon Nest. Prepare for the final battle"
       );
       return true;
-    } else if (num === 8 && !battleWin) {
+    } else if (num === 8 && !gameState.getbattleWin()) {
       saveGame();
       return true;
-    } else if (num === 9 && battleWin) {
+    } else if (num === 9 && gameState.getbattleWin()) {
       saveGame();
       return true;
-    } else if (num === 9 && !battleWin) {
+    } else if (num === 9 && !gameState.getbattleWin()) {
       loadGame();
       return true;
-    } else if (num === 10 && battleWin) {
+    } else if (num === 10 && gameState.getbattleWin()) {
       loadGame();
       return true;
     }
-  } else if (currentLocation === "dragon nest") {
+  } else if (gameState.getcurrentLocation() === "dragon nest") {
     if (num === 1) {
       showStatus();
       return true;
@@ -528,7 +534,7 @@ function playerMove(num) {
       combat(dragon);
       return true;
     } else if (num === 5) {
-      currentLocation = "forest";
+      gameState.setcurrentLocation("forest");
       console.log("\nYou return to the forest.");
       return true;
     } else if (num === 6) {
@@ -550,8 +556,6 @@ function playerMove(num) {
   }
   return false;
 }
-
-module.exports = {};
 
 // /**
 //  * Quit the game

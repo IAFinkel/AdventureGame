@@ -1,6 +1,14 @@
-const { playerGold } = require("./gameState");
+const gameState = require("./gameState");
 const readline = require("readline-sync");
 let inventory = []; //Array will store weapon, armor and heath potions
+
+function getInventory() {
+  return inventory;
+}
+
+function setInvetory(newInventory) {
+  inventory = newInventory;
+}
 
 /**
  * Inventory check
@@ -112,8 +120,8 @@ function hasGoodEquip() {
 function buyItems(item) {
   const ItemClass = item.constructor;
 
-  if (playerGold >= item.value) {
-    playerGold -= item.value;
+  if (gameState.getplayerGold() >= item.value) {
+    gameState.setplayerGold(gameState.getplayerGold() - item.value);
     inventory.push(
       new ItemClass(
         item.name,
@@ -124,7 +132,7 @@ function buyItems(item) {
       )
     );
     console.log(`You bought a ${item.name} for ${item.value} gold!`);
-    console.log("Gold remaining: " + playerGold);
+    console.log("Gold remaining: " + gameState.getplayerGold());
   } else {
     console.log("\n'Come back when you have more gold!'");
   }
@@ -184,7 +192,8 @@ function chooseWeaponForBattle(type) {
 }
 
 module.exports = {
-  inventory,
+  getInventory,
+  setInvetory,
   inventoryCheck,
   showInventoryNames,
   useItem,

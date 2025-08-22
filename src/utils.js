@@ -1,13 +1,5 @@
 const { showInventoryNames } = require("./inventory");
-const {
-  playerName,
-  playerHealth,
-  playerGold,
-  gameRunning,
-  currentLocation,
-  battleWin,
-} = require("./gameState");
-
+const gameState = require("./gameState");
 const readline = require("readline-sync");
 
 /** 
@@ -15,19 +7,19 @@ Update player health if damaged of healed
 * @param {number} healthPoints health or damage value
 */
 function updateHealth(healthPoints) {
-  if (healthPoints < 0 && playerHealth > 0) {
-    playerHealth = playerHealth + healthPoints;
-    console.log("Player health is " + playerHealth);
-  } else if (healthPoints > 0 && playerHealth < 100) {
-    let remainingHealth = 100 - playerHealth;
+  if (healthPoints < 0 && gameState.getplayerHealth() > 0) {
+    gameState.setplayerHealth(gameState.getplayerHealth() + healthPoints);
+    console.log("Player health is " + gameState.getplayerHealth());
+  } else if (healthPoints > 0 && gameState.getplayerHealth() < 100) {
+    let remainingHealth = 100 - gameState.getplayerHealth();
     if (remainingHealth > healthPoints) {
-      playerHealth = playerHealth + healthPoints;
-      console.log("Player health is " + playerHealth);
+      gameState.setplayerHealth(gameState.getplayerHealth() + healthPoints);
+      console.log("Player health is " + gameState.getplayerHealth());
     } else {
-      playerHealth = 100;
-      console.log("Player health is " + playerHealth);
+      gameState.setplayerHealth(100);
+      console.log("Player health is " + gameState.getplayerHealth());
     }
-  } else if (healthPoints > 0 && playerHealth >= 100) {
+  } else if (healthPoints > 0 && gameState.getplayerHealth() >= 100) {
     console.log("The player health is maximum");
   }
 }
@@ -36,9 +28,9 @@ function updateHealth(healthPoints) {
 Checks the player health and out if died
 */
 function outIfDied() {
-  if (playerHealth <= 0) {
+  if (gameState.getplayerHealth() <= 0) {
     console.log("\nGame Over! Your health reached 0!");
-    gameRunning = false;
+    gameState.setgameRunning(false);
   }
 }
 
@@ -46,7 +38,7 @@ function outIfDied() {
  * Quit the game
  */
 function quit() {
-  gameRunning = false;
+  gameState.setgameRunning(false);
   console.log("\nThanks for playing!");
 }
 
@@ -88,10 +80,10 @@ function showHelp() {
  * Displays health, gold, and location
  */
 function showStatus() {
-  console.log("\n=== " + playerName + "'s Status ===");
-  console.log("❤️  Health: " + playerHealth);
-  console.log("💰 Gold: " + playerGold);
-  console.log("📍 Location: " + currentLocation);
+  console.log("\n=== " + gameState.getplayerName() + "'s Status ===");
+  console.log("❤️  Health: " + gameState.getplayerHealth());
+  console.log("💰 Gold: " + gameState.getplayerGold());
+  console.log("📍 Location: " + gameState.getcurrentLocation());
   showInventoryNames();
 }
 
@@ -128,24 +120,33 @@ function playerChoiseValidation(choice) {
     if (isNaN(choiceNum)) {
       throw new Error("Error:This is not a number " + choice);
     }
-    if (currentLocation === "village" && (choiceNum < 1 || choiceNum > 10)) {
+    if (
+      gameState.getcurrentLocation() === "village" &&
+      (choiceNum < 1 || choiceNum > 10)
+    ) {
       throw new Error(
         "Error:This is not a valid input for village " + choiceNum
       );
     }
-    if (currentLocation === "blacksmith" && (choiceNum < 1 || choiceNum > 11)) {
+    if (
+      gameState.getcurrentLocation() === "blacksmith" &&
+      (choiceNum < 1 || choiceNum > 11)
+    ) {
       throw new Error(
         "Error:This is not a valid input for blacksmith " + choiceNum
       );
     }
-    if (currentLocation === "market" && (choiceNum < 1 || choiceNum > 9)) {
+    if (
+      gameState.getcurrentLocation() === "market" &&
+      (choiceNum < 1 || choiceNum > 9)
+    ) {
       throw new Error(
         "Error:This is not a valid input for market " + choiceNum
       );
     }
     if (
-      currentLocation === "forest" &&
-      battleWin &&
+      gameState.getcurrentLocation() === "forest" &&
+      gameState.getbattleWin() &&
       (choiceNum < 1 || choiceNum > 10)
     ) {
       throw new Error(
@@ -153,15 +154,18 @@ function playerChoiseValidation(choice) {
       );
     }
     if (
-      currentLocation === "forest" &&
-      battleWin === false &&
+      gameState.getcurrentLocation() === "forest" &&
+      gameState.getbattleWin() === false &&
       (choiceNum < 1 || choiceNum > 9)
     ) {
       throw new Error(
         "Error:This is not a valid input for forest " + choiceNum
       );
     }
-    if (currentLocation === "dragon nest" && (choiceNum < 1 || choiceNum > 9)) {
+    if (
+      gameState.getcurrentLocation() === "dragon nest" &&
+      (choiceNum < 1 || choiceNum > 9)
+    ) {
       throw new Error(
         "Error:This is not a valid input for dragon nest " + choiceNum
       );

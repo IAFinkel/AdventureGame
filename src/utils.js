@@ -93,19 +93,23 @@ function showStatus() {
  */
 function askForChoise() {
   while (true) {
-    let choice = readline.question("\nEnter choice (number): ");
-    choice = choice.trim().toLowerCase();
-    if (choice === "quit" || choice === "q" || choice === "exit") {
-      quit();
-      return null;
-    }
-    if (choice === "help") {
-      showHelp();
-      continue;
-    }
-    let validChoice = playerChoiseValidation(choice);
-    if (validChoice !== null) {
-      return validChoice;
+    try {
+      let choice = readline.question("\nEnter choice (number): ");
+      choice = choice.trim().toLowerCase();
+      if (choice === "quit" || choice === "q" || choice === "exit") {
+        quit();
+        return null;
+      }
+      if (choice === "help") {
+        showHelp();
+        continue;
+      }
+      let validChoice = playerChoiseValidation(choice);
+      if (validChoice !== null) {
+        return validChoice;
+      }
+    } catch (error) {
+      console.log("Invalid choise, please try again");
     }
   }
 }
@@ -170,7 +174,6 @@ function playerChoiseValidation(choice) {
         "Error:This is not a valid input for dragon nest " + choiceNum
       );
     } else {
-      //  console.log("Youre choise is " + choiceNum);
       return choiceNum;
     }
   } catch (error) {

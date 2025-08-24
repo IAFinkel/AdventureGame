@@ -98,8 +98,6 @@ function startDialog() {
         readline.question("\nWhat is your name, brave adventurer? ")
       );
       console.log("\nWelcome, " + gameState.getplayerName() + "!");
-      // Weapon damage (starts at 0 until player buys a sword)
-
       console.log("Starting weapon damage: " + gameState.getweaponDamage());
       console.log("When you buy a weapon, weapon damage will increase!");
       console.log("Healing potion value: " + gameState.getHealingPotionValue());

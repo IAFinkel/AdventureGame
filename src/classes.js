@@ -73,9 +73,6 @@ class Enemy {
           updateHealth(-leftoverDamage);
         }
         console.log("Player defense level is " + gameState.getplayerDefense());
-
-        // console.log(`You drink the ${this.name}, + ${this.effect} to health`);
-        // updateHealth(this.effect);
       } else {
         updateHealth(-this.damage);
       }

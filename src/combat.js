@@ -63,28 +63,26 @@ function combat(enemy) {
       if (enemyClone.health <= 0 && gameState.getplayerHealth() <= 0) {
         console.log("Both you and the monster fall in battle");
         inBattle = false;
-      } else if (enemyClone.health <= 0 && enemyClone.type === "easy") {
-        console.log("Monster defeated!");
-        console.log("You found 10 gold!");
-        gameState.setplayerGold(gameState.getplayerGold() + 10);
-        inBattle = false;
-        gameState.setbattleWin(true);
-        gameState.setcurrentLocation("village");
-        console.log("\nYou return to the safety of the village.");
-      } else if (enemyClone.health <= 0 && enemyClone.type === "hard") {
-        console.log("Monster defeated!");
-        console.log("You found 30 gold!");
-        gameState.setplayerGold(gameState.getplayerGold() + 30);
-        inBattle = false;
-        gameState.setbattleWin(true);
-        gameState.setcurrentLocation("village");
-        console.log("\nYou return to the safety of the village.");
-      } else if (enemyClone.health <= 0 && enemyClone.type === "boss") {
-        console.log("You killed the Dragon!");
-        console.log("Game Over");
-        inBattle = false;
-        quit();
-      } else if (gameState.getplayerHealth() <= 0) {
+      }
+
+      if (enemyClone.health <= 0) {
+        if (enemyClone.type === "boss") {
+          console.log("You killed the Dragon!");
+          console.log("Game Over");
+          inBattle = false;
+          quit();
+        } else {
+          let reward = enemyClone.type === "easy" ? 10 : 30;
+          console.log("Monster defeated!");
+          console.log(`You found ${reward} gold!`);
+          gameState.setplayerGold(gameState.getplayerGold() + reward);
+          inBattle = false;
+          gameState.setbattleWin(true);
+          gameState.setcurrentLocation("village");
+          console.log("\nYou return to the safety of the village.");
+        }
+      }
+      if (gameState.getplayerHealth() <= 0) {
         inBattle = false;
       }
     }

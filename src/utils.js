@@ -8,7 +8,9 @@ Update player health if damaged of healed
 */
 function updateHealth(healthPoints) {
   if (healthPoints < 0 && gameState.getplayerHealth() > 0) {
-    gameState.setplayerHealth(gameState.getplayerHealth() + healthPoints);
+    gameState.setplayerHealth(
+      Math.max(0, gameState.getplayerHealth() + healthPoints)
+    );
     console.log("Player health is " + gameState.getplayerHealth());
   } else if (healthPoints > 0 && gameState.getplayerHealth() < 100) {
     let remainingHealth = 100 - gameState.getplayerHealth();
@@ -21,16 +23,6 @@ function updateHealth(healthPoints) {
     }
   } else if (healthPoints > 0 && gameState.getplayerHealth() >= 100) {
     console.log("The player health is maximum");
-  }
-}
-
-/*
-Checks the player health and out if died
-*/
-function outIfDied() {
-  if (gameState.getplayerHealth() <= 0) {
-    console.log("\nGame Over! Your health reached 0!");
-    gameState.setgameRunning(false);
   }
 }
 
@@ -184,7 +176,6 @@ function playerChoiseValidation(choice) {
 
 module.exports = {
   updateHealth,
-  outIfDied,
   quit,
   showHelp,
   showStatus,

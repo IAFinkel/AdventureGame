@@ -6,7 +6,7 @@ function getInventory() {
   return inventory;
 }
 
-function setInvetory(newInventory) {
+function setInventory(newInventory) {
   inventory = newInventory;
 }
 
@@ -193,7 +193,7 @@ function chooseWeaponForBattle(type) {
 
 module.exports = {
   getInventory,
-  setInvetory,
+  setInventory,
   inventoryCheck,
   showInventoryNames,
   useItem,

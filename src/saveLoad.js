@@ -1,8 +1,9 @@
-const { getInventory, setInvetory } = require("./inventory");
+const { getInventory, setInventory } = require("./inventory");
 const { Weapon, Armor, Potion, Item } = require("./classes");
 const gameState = require("./gameState");
 const fs = require("fs");
 const readline = require("readline-sync");
+const { quit } = require("./utils");
 
 function saveGame() {
   const status = {
@@ -41,7 +42,7 @@ function loadGame() {
     gameState.setfirstVisit(parsedData.firstVisit);
     gameState.setbattleWin(parsedData.battleWin);
 
-    setInvetory(
+    setInventory(
       parsedData.inventory.map((item) => {
         switch (item.classType) {
           case "Potion":
@@ -111,4 +112,26 @@ function startDialog() {
   }
 }
 
-module.exports = { saveGame, loadGame, startDialog };
+/*
+Checks the player health and out if died
+*/
+function outIfDied() {
+  if (gameState.getplayerHealth() <= 0) {
+    // gameState.setgameRunning(false);
+    try {
+      let choice = readline.question(
+        "\nYou died. Game Over! \nDo you whant to load last save? Y/N"
+      );
+      choice = choice.trim().toLowerCase();
+      if (choice === "y") {
+        loadGame();
+      } else {
+        quit();
+      }
+    } catch (error) {
+      console.log("Smth went wrong! " + error.message);
+    }
+  }
+}
+
+module.exports = { saveGame, loadGame, startDialog, outIfDied };

@@ -1,13 +1,7 @@
 const { combat } = require("./combat");
 const { inventory, inventoryCheck, useItem, buyItems } = require("./inventory");
-const {
-  outIfDied,
-  quit,
-  showHelp,
-  showStatus,
-  askForChoise,
-} = require("./utils");
-const { saveGame, loadGame, startDialog } = require("./saveLoad");
+const { quit, showHelp, showStatus, askForChoise } = require("./utils");
+const { saveGame, loadGame, startDialog, outIfDied } = require("./saveLoad");
 const {
   sword,
   steelSword,
